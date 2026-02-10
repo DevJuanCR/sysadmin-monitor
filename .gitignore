@@ -1,0 +1,20 @@
+# Java y Maven
+backend/target/
+*.class
+*.jar
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Python
+agent/__pycache__/
+agent/*.pyc
+agent/venv/
+agent/.venv/
+
+# Sistema
+.DS_Store
+Thumbs.db

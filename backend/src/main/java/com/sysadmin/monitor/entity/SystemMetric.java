@@ -15,14 +15,17 @@ public class SystemMetric {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // clave primaria la genera la BD automaticamente
+    private Long id;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp; // momento exacto en que se tomo la lectura
+    private String hostname;
 
     @Column(nullable = false)
-    private Double cpuUsage; // porcentaje de uso de CPU de 0.0 a 100.0
+    private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private Double ramUsage; // porcentaje de uso de RAM de 0.0 a 100.0
+    private Double cpuUsage;
+
+    @Column(nullable = false)
+    private Double ramUsage;
 }

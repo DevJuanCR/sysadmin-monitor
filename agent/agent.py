@@ -2,16 +2,18 @@ import psutil
 import requests
 import time
 import sys
+import socket
 
 API_URL = "http://localhost:8080/api/metrics"
 INTERVALO_SEGUNDOS = 5
+HOSTNAME = socket.gethostname()  # cogemos el nombre de la maquina automaticamente
 
 
 def obtener_metricas():
     # cogemos el porcentaje de CPU y RAM del sistema
-    cpu = psutil.cpu_percent(interval=1)  # interval=1 para que mida 1 seg y no devuelva 0.0
+    cpu = psutil.cpu_percent(interval=1)
     ram = psutil.virtual_memory().percent
-    return {"cpuUsage": cpu, "ramUsage": ram}
+    return {"hostname": HOSTNAME, "cpuUsage": cpu, "ramUsage": ram}
 
 
 def enviar_metricas(metricas):
@@ -20,7 +22,7 @@ def enviar_metricas(metricas):
         respuesta = requests.post(API_URL, json=metricas, timeout=5)
         if respuesta.status_code == 201:
             datos = respuesta.json()
-            print(f"[OK] Metrica guardada - ID: {datos['id']} "
+            print(f"[OK] {datos['hostname']} - ID: {datos['id']} "
                   f"CPU: {datos['cpuUsage']}% RAM: {datos['ramUsage']}%")
         else:
             print(f"[WARN] Respuesta inesperada: {respuesta.status_code}")
@@ -36,6 +38,7 @@ def main():
     # bucle principal que lee y envia metricas cada X segundos
     print("=" * 55)
     print("  SysAdmin Monitor Agent")
+    print(f"  Host: {HOSTNAME}")
     print(f"  Enviando metricas a: {API_URL}")
     print(f"  Intervalo: cada {INTERVALO_SEGUNDOS} segundos")
     print("  Pulsa Ctrl+C para detener")

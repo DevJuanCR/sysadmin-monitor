@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -33,10 +34,11 @@ class MetricControllerTest {
 
     @Test
     void postMetric_withValidData_shouldReturn201() throws Exception {
-        SystemMetricDTO dto = new SystemMetricDTO(45.2, 67.8);
+        SystemMetricDTO dto = new SystemMetricDTO("PC-01", 45.2, 67.8);
 
         SystemMetric saved = SystemMetric.builder()
                 .id(1L)
+                .hostname("PC-01")
                 .timestamp(LocalDateTime.now())
                 .cpuUsage(45.2)
                 .ramUsage(67.8)
@@ -49,13 +51,24 @@ class MetricControllerTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.cpuUsage").value(45.2))
-                .andExpect(jsonPath("$.ramUsage").value(67.8));
+                .andExpect(jsonPath("$.hostname").value("PC-01"))
+                .andExpect(jsonPath("$.cpuUsage").value(45.2));
+    }
+
+    @Test
+    void postMetric_withNullHostname_shouldReturn400() throws Exception {
+        String json = "{\"cpuUsage\": 45.2, \"ramUsage\": 67.8}";
+
+        mockMvc.perform(post("/api/metrics")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.hostname").exists());
     }
 
     @Test
     void postMetric_withNullCpu_shouldReturn400() throws Exception {
-        String json = "{\"ramUsage\": 67.8}";
+        String json = "{\"hostname\": \"PC-01\", \"ramUsage\": 67.8}";
 
         mockMvc.perform(post("/api/metrics")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,7 +79,7 @@ class MetricControllerTest {
 
     @Test
     void postMetric_withCpuOver100_shouldReturn400() throws Exception {
-        String json = "{\"cpuUsage\": 150.0, \"ramUsage\": 67.8}";
+        String json = "{\"hostname\": \"PC-01\", \"cpuUsage\": 150.0, \"ramUsage\": 67.8}";
 
         mockMvc.perform(post("/api/metrics")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +90,7 @@ class MetricControllerTest {
 
     @Test
     void postMetric_withNegativeRam_shouldReturn400() throws Exception {
-        String json = "{\"cpuUsage\": 45.2, \"ramUsage\": -5.0}";
+        String json = "{\"hostname\": \"PC-01\", \"cpuUsage\": 45.2, \"ramUsage\": -5.0}";
 
         mockMvc.perform(post("/api/metrics")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,27 +100,55 @@ class MetricControllerTest {
     }
 
     @Test
-    void getMetrics_shouldReturn200() throws Exception {
+    void getMetrics_withoutHostname_shouldReturn200() throws Exception {
         SystemMetric metric = SystemMetric.builder()
                 .id(1L)
+                .hostname("PC-01")
                 .timestamp(LocalDateTime.now())
                 .cpuUsage(45.2)
                 .ramUsage(67.8)
                 .build();
 
-        when(metricService.getLatestMetrics()).thenReturn(List.of(metric));
+        when(metricService.getLatestMetrics(null)).thenReturn(List.of(metric));
 
         mockMvc.perform(get("/api/metrics"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].cpuUsage").value(45.2));
+                .andExpect(jsonPath("$[0].hostname").value("PC-01"));
+    }
+
+    @Test
+    void getMetrics_withHostname_shouldReturn200() throws Exception {
+        SystemMetric metric = SystemMetric.builder()
+                .id(1L)
+                .hostname("PC-01")
+                .timestamp(LocalDateTime.now())
+                .cpuUsage(45.2)
+                .ramUsage(67.8)
+                .build();
+
+        when(metricService.getLatestMetrics(eq("PC-01"))).thenReturn(List.of(metric));
+
+        mockMvc.perform(get("/api/metrics").param("hostname", "PC-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].hostname").value("PC-01"));
     }
 
     @Test
     void getMetrics_withNoData_shouldReturnEmptyList() throws Exception {
-        when(metricService.getLatestMetrics()).thenReturn(List.of());
+        when(metricService.getLatestMetrics(null)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/metrics"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getHosts_shouldReturn200() throws Exception {
+        when(metricService.getHostnames()).thenReturn(List.of("PC-01", "PC-02"));
+
+        mockMvc.perform(get("/api/metrics/hosts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("PC-01"))
+                .andExpect(jsonPath("$[1]").value("PC-02"));
     }
 }

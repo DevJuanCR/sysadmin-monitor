@@ -1,11 +1,11 @@
-const API_URL = "/api/metrics";
-const INTERVALO = 5000; // cada 5 segundos igual que el agente Python
+const API_BASE = "/api/metrics";
+const INTERVALO = 5000;
 
 const statusEl = document.getElementById("status");
 const cpuValueEl = document.getElementById("cpu-value");
 const ramValueEl = document.getElementById("ram-value");
+const hostSelect = document.getElementById("host-select");
 
-// configuracion comun para los dos graficos
 function crearConfig(label, color) {
     return {
         type: "line",
@@ -44,7 +44,6 @@ function crearConfig(label, color) {
     };
 }
 
-// creamos los dos graficos
 const cpuChart = new Chart(
     document.getElementById("cpuChart"),
     crearConfig("CPU", "#38bdf8")
@@ -55,7 +54,6 @@ const ramChart = new Chart(
     crearConfig("RAM", "#a78bfa")
 );
 
-// formateamos el timestamp para que se lea bien en el eje X
 function formatearHora(timestamp) {
     const fecha = new Date(timestamp);
     const h = String(fecha.getHours()).padStart(2, "0");
@@ -64,17 +62,42 @@ function formatearHora(timestamp) {
     return h + ":" + m + ":" + s;
 }
 
-// actualizamos un grafico con los datos nuevos
 function actualizarGrafico(chart, labels, datos) {
     chart.data.labels = labels;
     chart.data.datasets[0].data = datos;
     chart.update();
 }
 
-// pedimos las metricas al backend y actualizamos todo
+async function cargarHosts() {
+    try {
+        const response = await fetch(API_BASE + "/hosts");
+        const hosts = await response.json();
+
+        // limpiamos las opciones menos la primera
+        while (hostSelect.options.length > 1) {
+            hostSelect.remove(1);
+        }
+
+        hosts.forEach(host => {
+            const option = document.createElement("option");
+            option.value = host;
+            option.textContent = host;
+            hostSelect.appendChild(option);
+        });
+    } catch (error) {
+        // si falla no pasa nada el selector se queda con la opcion por defecto
+    }
+}
+
 async function fetchMetricas() {
     try {
-        const response = await fetch(API_URL);
+        let url = API_BASE;
+        const selectedHost = hostSelect.value;
+        if (selectedHost) {
+            url += "?hostname=" + encodeURIComponent(selectedHost);
+        }
+
+        const response = await fetch(url);
 
         if (!response.ok) {
             throw new Error("Status " + response.status);
@@ -88,16 +111,13 @@ async function fetchMetricas() {
             return;
         }
 
-        // sacamos las horas y los valores de cada metrica
         const labels = metricas.map(m => formatearHora(m.timestamp));
         const cpuData = metricas.map(m => m.cpuUsage);
         const ramData = metricas.map(m => m.ramUsage);
 
-        // actualizamos los graficos
         actualizarGrafico(cpuChart, labels, cpuData);
         actualizarGrafico(ramChart, labels, ramData);
 
-        // actualizamos los valores grandes con la ultima lectura
         const ultima = metricas[metricas.length - 1];
         cpuValueEl.textContent = ultima.cpuUsage.toFixed(1) + "%";
         ramValueEl.textContent = ultima.ramUsage.toFixed(1) + "%";
@@ -111,6 +131,15 @@ async function fetchMetricas() {
     }
 }
 
-// primera carga y luego cada 5 segundos
+// cuando cambia el selector recargamos los datos
+hostSelect.addEventListener("change", fetchMetricas);
+
+// primera carga
+cargarHosts();
 fetchMetricas();
-setInterval(fetchMetricas, INTERVALO);
+
+// actualizamos cada 5 segundos
+setInterval(() => {
+    cargarHosts();
+    fetchMetricas();
+}, INTERVALO);

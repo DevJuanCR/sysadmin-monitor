@@ -20,6 +20,7 @@ public class MetricService {
     public SystemMetric saveMetric(SystemMetricDTO dto) {
 
         SystemMetric metric = SystemMetric.builder()
+                .hostname(dto.getHostname())
                 .timestamp(LocalDateTime.now())
                 .cpuUsage(dto.getCpuUsage())
                 .ramUsage(dto.getRamUsage())
@@ -27,7 +28,8 @@ public class MetricService {
 
         SystemMetric savedMetric = metricRepository.save(metric);
 
-        log.info("Metrica guardada - ID: {} CPU: {}% RAM: {}%",
+        log.info("Metrica guardada - Host: {} ID: {} CPU: {}% RAM: {}%",
+                savedMetric.getHostname(),
                 savedMetric.getId(),
                 savedMetric.getCpuUsage(),
                 savedMetric.getRamUsage());
@@ -35,8 +37,19 @@ public class MetricService {
         return savedMetric;
     }
 
-    public List<SystemMetric> getLatestMetrics() {
-        List<SystemMetric> metrics = metricRepository.findTop20ByOrderByTimestampDesc();
-        return metrics.reversed(); // las invertimos para que el grafico vaya de izquierda a derecha
+    public List<SystemMetric> getLatestMetrics(String hostname) {
+        List<SystemMetric> metrics;
+
+        if (hostname != null && !hostname.isBlank()) {
+            metrics = metricRepository.findTop20ByHostnameOrderByTimestampDesc(hostname);
+        } else {
+            metrics = metricRepository.findTop20ByOrderByTimestampDesc();
+        }
+
+        return metrics.reversed();
+    }
+
+    public List<String> getHostnames() {
+        return metricRepository.findDistinctHostnames();
     }
 }

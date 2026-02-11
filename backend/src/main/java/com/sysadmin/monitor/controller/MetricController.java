@@ -26,8 +26,15 @@ public class MetricController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SystemMetric>> getLatestMetrics() {
-        List<SystemMetric> metrics = metricService.getLatestMetrics();
+    public ResponseEntity<List<SystemMetric>> getLatestMetrics(
+            @RequestParam(required = false) String hostname) {
+        List<SystemMetric> metrics = metricService.getLatestMetrics(hostname);
         return ResponseEntity.ok(metrics);
+    }
+
+    @GetMapping("/hosts")
+    public ResponseEntity<List<String>> getHostnames() {
+        List<String> hostnames = metricService.getHostnames();
+        return ResponseEntity.ok(hostnames);
     }
 }

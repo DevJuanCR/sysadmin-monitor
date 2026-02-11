@@ -9,6 +9,9 @@ import lombok.*;
 @Builder
 public class SystemMetricDTO {
 
+    @NotBlank
+    private String hostname;
+
     @NotNull
     @Min(0)
     @Max(100)

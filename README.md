@@ -1,10 +1,12 @@
+![Tests](https://github.com/devjuancr/sysadmin-monitor/actions/workflows/tests.yml/badge.svg)
+
 # SysAdmin Monitor Dashboard
 
-Sistema de monitorizacion en tiempo real que recoge metricas de CPU y RAM de una maquina y las envia a una API REST
+Sistema de monitorizacion en tiempo real que recoge metricas de CPU y RAM de varias maquinas y las envia a una API REST
 
 ## Como funciona
 
-Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando `psutil` y lo envia por POST a un backend en Java Spring Boot que lo guarda en base de datos. Un frontend con `Chart.js` muestra los graficos en tiempo real
+Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando `psutil` y lo envia por POST a un backend en Java Spring Boot que lo guarda en base de datos. Un frontend con `Chart.js` muestra los graficos en tiempo real. Soporta multiples maquinas con un selector en el dashboard
 
 ## Stack
 
@@ -13,6 +15,7 @@ Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando
 - **Agente:** Python 3 + `psutil` + `requests`
 - **Frontend:** HTML5 + CSS3 + JavaScript + `Chart.js`
 - **Testing:** JUnit 5 + Mockito + MockMvc
+- **CI:** GitHub Actions
 
 ## Como arrancarlo
 
@@ -37,9 +40,11 @@ Arrancar el backend con perfil de produccion:
     pip install -r requirements.txt
     python agent.py
 ```
+Se puede ejecutar en varias maquinas apuntando a la misma API. Cada agente envia su hostname automaticamente
+
 ### Dashboard
 
-Abrir `http://localhost:8080/index.html` en el navegador
+Abrir `http://localhost:8080/index.html` en el navegador. Usar el selector de arriba para filtrar por maquina
 
 ### Ejecutar tests
 ```bash
@@ -50,13 +55,17 @@ Abrir `http://localhost:8080/index.html` en el navegador
 
 ### POST `/api/metrics`
 
-Envia una metrica. Los campos `cpuUsage` y `ramUsage` son obligatorios y deben estar entre 0 y 100
+Envia una metrica. Todos los campos son obligatorios. `cpuUsage` y `ramUsage` deben estar entre 0 y 100
 
-    {"cpuUsage": 45.2, "ramUsage": 67.8}
+    {"hostname": "PC-01", "cpuUsage": 45.2, "ramUsage": 67.8}
 
 ### GET `/api/metrics`
 
-Devuelve las ultimas 20 metricas ordenadas por timestamp
+Devuelve las ultimas 20 metricas. Se puede filtrar por maquina con `?hostname=PC-01`
+
+### GET `/api/metrics/hosts`
+
+Devuelve la lista de maquinas que han enviado datos
 
 ## Estado del proyecto
 
@@ -68,4 +77,6 @@ Devuelve las ultimas 20 metricas ordenadas por timestamp
 - [x] Perfiles de Spring (dev/prod)
 - [x] Validacion de datos con Bean Validation
 - [x] Manejo global de errores
-- [x] Tests unitarios y de integracion (9 tests)
+- [x] Soporte multi-maquina con selector en el dashboard
+- [x] Tests unitarios y de integracion
+- [x] CI con GitHub Actions

@@ -23,7 +23,7 @@ Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando
 ### Opcion A - Todo con Docker (un solo comando)
 ```bash
     docker compose up --build
-```
+
 Abre `http://localhost:8080/index.html` y el dashboard estara funcionando
 
 Para parar:
@@ -49,7 +49,7 @@ Levantar solo la base de datos:
 Arrancar el backend con perfil de produccion:
 ```bash
     cd backend
-    .\mvnw spring-boot:run "-Dspring-boot.run.profiles=prod"
+    mvn spring-boot:run "-Dspring-boot.run.profiles=prod"
 ```
 ### Dashboard
 
@@ -58,7 +58,7 @@ Abrir `http://localhost:8080/index.html` en el navegador. Usar el selector de ar
 ### Ejecutar tests
 ```bash
     cd backend
-    .\mvnw test
+    mvn test
 ```
 ## API
 

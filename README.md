@@ -4,34 +4,41 @@ Sistema de monitorizacion en tiempo real que recoge metricas de CPU y RAM de una
 
 ## Como funciona
 
-Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando `psutil` y lo envia por POST a un backend en Java Spring Boot que lo guarda en base de datos
+Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando `psutil` y lo envia por POST a un backend en Java Spring Boot que lo guarda en base de datos. Un frontend con `Chart.js` muestra los graficos en tiempo real
 
 ## Stack
 
-- **Backend:** Java 21 + Spring Boot + Spring Data JPA + H2
+- **Backend:** Java 21 + Spring Boot + Spring Data JPA
+- **Base de datos:** PostgreSQL 16 (Docker) / H2 para desarrollo
 - **Agente:** Python 3 + `psutil` + `requests`
+- **Frontend:** HTML5 + CSS3 + JavaScript + `Chart.js`
 
 ## Como arrancarlo
 
-### Backend
+### Opcion A - Desarrollo rapido (H2 en memoria)
 
 Abrir el proyecto `backend/` en IntelliJ y ejecutar `MonitorApplication.java`
 
-El servidor arranca en `http://localhost:8080/index.html`
+### Opcion B - Con PostgreSQL (Docker)
 
+Levantar la base de datos:
+```bash
+    docker compose up -d
+```
+Arrancar el backend con perfil de produccion:
+```bash
+    cd backend
+    mvn spring-boot:run -Dspring-boot.run.profiles=prod
+```
 ### Agente Python
-
+```bash
     cd agent
     pip install -r requirements.txt
     python agent.py
+```
+### Dashboard
 
-### Consola H2
-
-Para ver los datos guardados ir a `http://localhost:8080/h2-console`
-
-- JDBC URL: `jdbc:h2:mem:monitordb`
-- User: `sa`
-- Password: vacio
+Abrir `http://localhost:8080/index.html` en el navegador
 
 ## Estado del proyecto
 
@@ -40,4 +47,5 @@ Para ver los datos guardados ir a `http://localhost:8080/h2-console`
 - [x] Base de datos H2 en memoria
 - [x] Endpoint GET para consultar metricas
 - [x] Frontend con graficos de CPU y RAM en tiempo real
-- [ ] Migracion a PostgreSQL
+- [X] Migracion a PostgreSQL
+- [x] Perfiles de Spring (dev/prod)

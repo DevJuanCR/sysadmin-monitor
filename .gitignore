@@ -18,3 +18,6 @@ agent/.venv/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Docker
+postgres_data/

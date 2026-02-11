@@ -2,6 +2,8 @@
 
 # SysAdmin Monitor Dashboard
 
+![Dashboard](docs/dashboard.gif)
+
 Sistema de monitorizacion en tiempo real que recoge metricas de CPU y RAM de varias maquinas y las envia a una API REST
 
 ## Como funciona

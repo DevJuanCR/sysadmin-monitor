@@ -12,6 +12,7 @@ Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando
 - **Base de datos:** PostgreSQL 16 (Docker) / H2 para desarrollo
 - **Agente:** Python 3 + `psutil` + `requests`
 - **Frontend:** HTML5 + CSS3 + JavaScript + `Chart.js`
+- **Testing:** JUnit 5 + Mockito + MockMvc
 
 ## Como arrancarlo
 
@@ -28,7 +29,7 @@ Levantar la base de datos:
 Arrancar el backend con perfil de produccion:
 ```bash
     cd backend
-    mvn spring-boot:run -Dspring-boot.run.profiles=prod
+    .\mvnw spring-boot:run "-Dspring-boot.run.profiles=prod"
 ```
 ### Agente Python
 ```bash
@@ -40,12 +41,31 @@ Arrancar el backend con perfil de produccion:
 
 Abrir `http://localhost:8080/index.html` en el navegador
 
+### Ejecutar tests
+```bash
+    cd backend
+    .\mvnw test
+```
+## API
+
+### POST `/api/metrics`
+
+Envia una metrica. Los campos `cpuUsage` y `ramUsage` son obligatorios y deben estar entre 0 y 100
+
+    {"cpuUsage": 45.2, "ramUsage": 67.8}
+
+### GET `/api/metrics`
+
+Devuelve las ultimas 20 metricas ordenadas por timestamp
+
 ## Estado del proyecto
 
-- [x] API REST con endpoint POST `/api/metrics`
+- [x] API REST con endpoints POST y GET
 - [x] Agente Python que envia metricas automaticamente
-- [x] Base de datos H2 en memoria
-- [x] Endpoint GET para consultar metricas
+- [x] Base de datos H2 en memoria para desarrollo
+- [x] PostgreSQL con Docker para produccion
 - [x] Frontend con graficos de CPU y RAM en tiempo real
-- [X] Migracion a PostgreSQL
 - [x] Perfiles de Spring (dev/prod)
+- [x] Validacion de datos con Bean Validation
+- [x] Manejo global de errores
+- [x] Tests unitarios y de integracion (9 tests)

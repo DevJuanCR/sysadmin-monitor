@@ -11,6 +11,33 @@ services:
       POSTGRES_PASSWORD: monitor123
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monitor -d monitordb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: sysadmin-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent:
+    build: ./agent
+    container_name: sysadmin-agent
+    restart: unless-stopped
+    environment:
+      API_URL: http://backend:8080/api/metrics
+      HOSTNAME_OVERRIDE: docker-agent
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:

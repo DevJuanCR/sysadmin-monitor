@@ -3,10 +3,11 @@ import requests
 import time
 import sys
 import socket
+import os
 
-API_URL = "http://localhost:8080/api/metrics"
-INTERVALO_SEGUNDOS = 5
-HOSTNAME = socket.gethostname()  # cogemos el nombre de la maquina automaticamente
+API_URL = os.getenv("API_URL", "http://localhost:8080/api/metrics")
+INTERVALO_SEGUNDOS = int(os.getenv("INTERVALO", "5"))
+HOSTNAME = os.getenv("HOSTNAME_OVERRIDE", socket.gethostname())
 
 
 def obtener_metricas():

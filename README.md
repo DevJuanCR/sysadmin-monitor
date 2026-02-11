@@ -11,37 +11,46 @@ Un script en Python lee el estado del sistema (CPU y RAM) cada 5 segundos usando
 ## Stack
 
 - **Backend:** Java 21 + Spring Boot + Spring Data JPA
-- **Base de datos:** PostgreSQL 16 (Docker) / H2 para desarrollo
+- **Base de datos:** PostgreSQL 16
 - **Agente:** Python 3 + `psutil` + `requests`
 - **Frontend:** HTML5 + CSS3 + JavaScript + `Chart.js`
 - **Testing:** JUnit 5 + Mockito + MockMvc
 - **CI:** GitHub Actions
+- **Infraestructura:** Docker + Docker Compose
 
 ## Como arrancarlo
 
-### Opcion A - Desarrollo rapido (H2 en memoria)
+### Opcion A - Todo con Docker (un solo comando)
+```bash
+    docker compose up --build
+```
+Abre `http://localhost:8080/index.html` y el dashboard estara funcionando
+
+Para parar:
+```bash
+    docker compose down
+```
+### Opcion B - Desarrollo local (H2 en memoria)
 
 Abrir el proyecto `backend/` en IntelliJ y ejecutar `MonitorApplication.java`
 
-### Opcion B - Con PostgreSQL (Docker)
-
-Levantar la base de datos:
+Arrancar el agente:
 ```bash
-    docker compose up -d
+    cd agent
+    pip install -r requirements.txt
+    python agent.py
+```
+### Opcion C - Backend local + PostgreSQL en Docker
+
+Levantar solo la base de datos:
+```bash
+    docker compose up postgres -d
 ```
 Arrancar el backend con perfil de produccion:
 ```bash
     cd backend
     .\mvnw spring-boot:run "-Dspring-boot.run.profiles=prod"
 ```
-### Agente Python
-```bash
-    cd agent
-    pip install -r requirements.txt
-    python agent.py
-```
-Se puede ejecutar en varias maquinas apuntando a la misma API. Cada agente envia su hostname automaticamente
-
 ### Dashboard
 
 Abrir `http://localhost:8080/index.html` en el navegador. Usar el selector de arriba para filtrar por maquina
@@ -71,12 +80,13 @@ Devuelve la lista de maquinas que han enviado datos
 
 - [x] API REST con endpoints POST y GET
 - [x] Agente Python que envia metricas automaticamente
-- [x] Base de datos H2 en memoria para desarrollo
+- [x] Soporte multi-maquina con selector en el dashboard
 - [x] PostgreSQL con Docker para produccion
+- [x] H2 en memoria para desarrollo
 - [x] Frontend con graficos de CPU y RAM en tiempo real
-- [x] Perfiles de Spring (dev/prod)
+- [x] Perfiles de Spring (dev/prod/docker)
 - [x] Validacion de datos con Bean Validation
 - [x] Manejo global de errores
-- [x] Soporte multi-maquina con selector en el dashboard
 - [x] Tests unitarios y de integracion
 - [x] CI con GitHub Actions
+- [x] Proyecto completamente dockerizado

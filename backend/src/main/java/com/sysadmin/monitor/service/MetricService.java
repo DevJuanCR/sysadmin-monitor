@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class MetricService {
     public SystemMetric saveMetric(SystemMetricDTO dto) {
 
         SystemMetric metric = SystemMetric.builder()
-                .timestamp(LocalDateTime.now()) // lo ponemos en el servidor no confiamos en el cliente
+                .timestamp(LocalDateTime.now())
                 .cpuUsage(dto.getCpuUsage())
                 .ramUsage(dto.getRamUsage())
                 .build();
@@ -32,5 +33,10 @@ public class MetricService {
                 savedMetric.getRamUsage());
 
         return savedMetric;
+    }
+
+    public List<SystemMetric> getLatestMetrics() {
+        List<SystemMetric> metrics = metricRepository.findTop20ByOrderByTimestampDesc();
+        return metrics.reversed(); // las invertimos para que el grafico vaya de izquierda a derecha
     }
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysAdmin Monitor</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<header>
+    <h1>SysAdmin Monitor Dashboard</h1>
+    <p id="status">Conectando...</p>
+</header>
+
+<main>
+    <div class="card">
+        <h2>CPU</h2>
+        <span id="cpu-value">--%</span>
+        <canvas id="cpuChart"></canvas>
+    </div>
+
+    <div class="card">
+        <h2>RAM</h2>
+        <span id="ram-value">--%</span>
+        <canvas id="ramChart"></canvas>
+    </div>
+</main>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
